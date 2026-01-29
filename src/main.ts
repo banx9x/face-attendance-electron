@@ -12,14 +12,26 @@ if (started) {
 // Configure auto-updater
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.logger = console;
+
+// Configure update server
+if (app.isPackaged) {
+  autoUpdater.setFeedURL({
+    provider: "github",
+    owner: "banx9x",
+    repo: "face-attendance-electron",
+  });
+}
 
 // Auto-updater events
 autoUpdater.on("checking-for-update", () => {
-  console.log("Checking for updates...");
+  console.log("=== Checking for updates...");
+  console.log("Current version:", app.getVersion());
+  console.log("Feed URL:", autoUpdater.getFeedURL());
 });
 
 autoUpdater.on("update-available", (info) => {
-  console.log("Update available:", info);
+  console.log("=== Update available:", JSON.stringify(info, null, 2));
   dialog
     .showMessageBox({
       type: "info",
@@ -36,8 +48,9 @@ autoUpdater.on("update-available", (info) => {
     });
 });
 
-autoUpdater.on("update-not-available", () => {
-  console.log("No updates available");
+autoUpdater.on("update-not-available", (info) => {
+  console.log("=== No updates available");
+  console.log("Latest version checked:", JSON.stringify(info, null, 2));
 });
 
 autoUpdater.on("download-progress", (progressObj) => {
@@ -72,7 +85,17 @@ autoUpdater.on("update-downloaded", () => {
 });
 
 autoUpdater.on("error", (error) => {
-  console.error("Error in auto-updater:", error);
+  console.error("=== Error in auto-updater:");
+  console.error("Error message:", error.message);
+  console.error("Error stack:", error.stack);
+
+  // Show error dialog for debugging
+  dialog.showMessageBox({
+    type: "error",
+    title: "Lỗi kiểm tra cập nhật",
+    message: `Không thể kiểm tra cập nhật: ${error.message}`,
+    buttons: ["OK"],
+  });
 });
 
 const createWindow = () => {
@@ -224,11 +247,18 @@ app.whenReady().then(() => {
 
   // Check for updates (only in production)
   if (!app.isPackaged) {
-    console.log("Development mode: Skipping update check");
+    console.log("=== Development mode: Skipping update check");
   } else {
+    console.log("=== Production mode: Will check for updates in 3 seconds");
+    console.log("=== App version:", app.getVersion());
+    console.log("=== App path:", app.getAppPath());
+
     // Check for updates after 3 seconds
     setTimeout(() => {
-      autoUpdater.checkForUpdates();
+      console.log("=== Starting update check now...");
+      autoUpdater.checkForUpdates().catch((err) => {
+        console.error("=== Failed to check for updates:", err);
+      });
     }, 3000);
   }
 });

@@ -68,6 +68,98 @@ jobs:
           name: release-${{ matrix.os }}
           path: out/make/**/*
 
+  generate-update-metadata:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Wait for release assets
+        run: sleep 30
+
+      - name: Get release info and generate metadata
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          TAG="v${VERSION}"
+
+          echo "Fetching release info for $TAG..."
+
+          # Get release info
+          RELEASE_JSON=$(gh api repos/${{ github.repository }}/releases/tags/$TAG)
+
+          # Extract Windows Setup.exe info
+          WIN_FILE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("Setup\\.exe$")) | .name')
+          WIN_SIZE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("Setup\\.exe$")) | .size')
+          WIN_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("Setup\\.exe$")) | .browser_download_url')
+
+          # Extract macOS zip info
+          MAC_FILE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("darwin-arm64.*\\.zip$")) | .name')
+          MAC_SIZE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("darwin-arm64.*\\.zip$")) | .size')
+          MAC_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("darwin-arm64.*\\.zip$")) | .browser_download_url')
+
+          RELEASE_DATE=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+
+          # Generate latest.yml for Windows
+          if [ -n "$WIN_FILE" ]; then
+            cat > latest.yml <<EOF
+          version: ${VERSION}
+          files:
+            - url: ${WIN_FILE}
+              sha512: ""
+              size: ${WIN_SIZE}
+          path: ${WIN_FILE}
+          sha512: ""
+          releaseDate: ${RELEASE_DATE}
+          EOF
+            echo "✓ Created latest.yml"
+            cat latest.yml
+          fi
+
+          # Generate latest-mac.yml for macOS
+          if [ -n "$MAC_FILE" ]; then
+            cat > latest-mac.yml <<EOF
+          version: ${VERSION}
+          files:
+            - url: ${MAC_FILE}
+              sha512: ""
+              size: ${MAC_SIZE}
+          path: ${MAC_FILE}
+          sha512: ""
+          releaseDate: ${RELEASE_DATE}
+          EOF
+            echo "✓ Created latest-mac.yml"
+            cat latest-mac.yml
+          fi
+
+      - name: Upload metadata to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.VERSION }}"
+
+          if [ -f "latest.yml" ]; then
+            gh release upload "$TAG" latest.yml --clobber
+            echo "✓ Uploaded latest.yml"
+          fi
+
+          if [ -f "latest-mac.yml" ]; then
+            gh release upload "$TAG" latest-mac.yml --clobber
+            echo "✓ Uploaded latest-mac.yml"
+          fi
+
+          echo ""
+          echo "✅ Update metadata files have been added to the release!"
+
   # cleanup-release:
   #   needs: build
   #   runs-on: ubuntu-latest

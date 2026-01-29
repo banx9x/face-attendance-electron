@@ -68,20 +68,20 @@ jobs:
           name: release-${{ matrix.os }}
           path: out/make/**/*
 
-  cleanup-release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # cleanup-release:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Remove source code assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          gh release edit $TAG --draft=false
+  #     - name: Remove source code assets
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: |
+  #         TAG=${GITHUB_REF#refs/tags/}
+  #         gh release edit $TAG --draft=false
 
-          # Delete source code assets if they exist
-          gh release delete-asset $TAG "Source code (zip)" --yes 2>/dev/null || true
-          gh release delete-asset $TAG "Source code (tar.gz)" --yes 2>/dev/null || true
+  #         # Delete source code assets if they exist
+  #         gh release delete-asset $TAG "Source code (zip)" --yes 2>/dev/null || true
+  #         gh release delete-asset $TAG "Source code (tar.gz)" --yes 2>/dev/null || true

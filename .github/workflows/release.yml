@@ -33,17 +33,16 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Install Python dependencies (macOS)
-        if: runner.os == 'macOS'
+      - name: Install Python dependencies
         run: |
-          pip install pyinstaller pillow opencv-python face-recognition numpy
-
-      - name: Install Python dependencies (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          pip install pyinstaller pillow opencv-python numpy
-          pip install face-recognition --no-deps
-          pip install dlib
+          pip install --upgrade pip
+          pip install pyinstaller==6.18.0
+          pip install fastapi==0.128.0 uvicorn==0.40.0 python-multipart==0.0.22
+          pip install pydantic==2.12.5 pydantic-settings==2.12.0
+          pip install flask==3.1.2 flask-cors==6.0.2
+          pip install pillow==12.1.0 opencv-python==4.13.0.90 numpy==2.4.1
+          pip install deepface==0.0.98 tensorflow==2.20.0 mtcnn==1.0.0 retina-face==0.0.17
+          pip install pandas==3.0.0 requests==2.32.5
 
       - name: Build Python server (macOS)
         if: runner.os == 'macOS'

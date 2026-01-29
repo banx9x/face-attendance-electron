@@ -16,8 +16,11 @@ const config: ForgeConfig = {
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    new MakerSquirrel({
+      setupIcon: "./src/client/assets/icon.ico",
+    }),
     new MakerZIP({}, ["darwin"]),
+    new MakerZIP({}, ["win32"]),
     new MakerRpm({}),
     new MakerDeb({}),
   ],
@@ -29,6 +32,7 @@ const config: ForgeConfig = {
       },
       prerelease: false,
       draft: true,
+      generateReleaseNotes: true, // Auto-generate release notes
     }),
   ],
   plugins: [

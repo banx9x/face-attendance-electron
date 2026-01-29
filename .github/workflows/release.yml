@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Install Python dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          pip install pyinstaller pillow opencv-python face-recognition numpy
+
+      - name: Install Python dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          pip install pyinstaller pillow opencv-python numpy
+          pip install face-recognition --no-deps
+          pip install dlib
+
+      - name: Build Python server (macOS)
+        if: runner.os == 'macOS'
+        run: bash scripts/build-server.sh
+
+      - name: Build Python server (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: bash scripts/build-server.sh
+
+      - name: Publish to GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: yarn publish
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}
+          path: out/make/**/*
+
+  cleanup-release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Remove source code assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          gh release edit $TAG --draft=false
+
+          # Delete source code assets if they exist
+          gh release delete-asset $TAG "Source code (zip)" --yes 2>/dev/null || true
+          gh release delete-asset $TAG "Source code (tar.gz)" --yes 2>/dev/null || true

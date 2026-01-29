@@ -8,8 +8,17 @@ block_cipher = None
 spec_root = os.path.abspath(SPECPATH)
 models_dir = os.path.join(spec_root, 'models')
 datas_list = []
+
+# Add models directory recursively (including hidden .deepface folder)
 if os.path.exists(models_dir):
-    datas_list.append((models_dir, 'models'))
+    for root, dirs, files in os.walk(models_dir, topdown=True):
+        # Don't skip hidden directories
+        for file in files:
+            src_path = os.path.join(root, file)
+            # Get relative path from models_dir
+            rel_dir = os.path.relpath(root, spec_root)
+            datas_list.append((src_path, rel_dir))
+            print(f"Adding: {src_path} -> {rel_dir}")
 
 # Thu thập data files của deepface và các package khác
 datas_list.extend(collect_data_files('deepface'))

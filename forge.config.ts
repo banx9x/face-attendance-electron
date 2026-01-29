@@ -31,7 +31,7 @@ const config: ForgeConfig = {
         name: "face-attendance-electron",
       },
       prerelease: false,
-      draft: true,
+      draft: false,
       generateReleaseNotes: true, // Auto-generate release notes
     }),
   ],

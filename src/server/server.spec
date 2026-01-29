@@ -5,7 +5,8 @@ import os
 block_cipher = None
 
 # Thu thập tất cả models từ thư mục models/ (nếu có)
-models_dir = os.path.join(os.path.dirname(os.path.abspath('main.py')), 'models')
+spec_root = os.path.abspath(SPECPATH)
+models_dir = os.path.join(spec_root, 'models')
 datas_list = []
 if os.path.exists(models_dir):
     datas_list.append((models_dir, 'models'))

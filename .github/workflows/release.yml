@@ -109,36 +109,60 @@ jobs:
 
           RELEASE_DATE=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
 
-          # Generate latest.yml for Windows
-          if [ -n "$WIN_FILE" ]; then
+          # For Windows: Calculate SHA512 by downloading (required by electron-updater)
+          if [ -n "$WIN_FILE" ] && [ -n "$WIN_URL" ]; then
+            echo "Downloading $WIN_FILE to calculate SHA512..."
+            curl -L -o "$WIN_FILE" "$WIN_URL"
+            
+            WIN_SHA512=$(sha512sum "$WIN_FILE" | awk '{print $1}')
+            WIN_SHA512_BASE64=$(echo -n "$WIN_SHA512" | xxd -r -p | base64)
+            
+            echo "Windows SHA512: $WIN_SHA512"
+            echo "Windows SHA512 (base64): $WIN_SHA512_BASE64"
+            
+            # Generate latest.yml for Windows
             cat > latest.yml <<EOF
           version: ${VERSION}
           files:
             - url: ${WIN_FILE}
-              sha512: ""
+              sha512: ${WIN_SHA512_BASE64}
               size: ${WIN_SIZE}
           path: ${WIN_FILE}
-          sha512: ""
+          sha512: ${WIN_SHA512_BASE64}
           releaseDate: ${RELEASE_DATE}
           EOF
-            echo "✓ Created latest.yml"
+            echo "✓ Created latest.yml with SHA512"
             cat latest.yml
+            
+            rm "$WIN_FILE"
           fi
 
-          # Generate latest-mac.yml for macOS
-          if [ -n "$MAC_FILE" ]; then
+          # For macOS: Calculate SHA512 by downloading
+          if [ -n "$MAC_FILE" ] && [ -n "$MAC_URL" ]; then
+            echo "Downloading $MAC_FILE to calculate SHA512..."
+            curl -L -o "$MAC_FILE" "$MAC_URL"
+            
+            MAC_SHA512=$(sha512sum "$MAC_FILE" | awk '{print $1}')
+            MAC_SHA512_BASE64=$(echo -n "$MAC_SHA512" | xxd -r -p | base64)
+            
+            echo "macOS SHA512: $MAC_SHA512"
+            echo "macOS SHA512 (base64): $MAC_SHA512_BASE64"
+            
+            # Generate latest-mac.yml for macOS
             cat > latest-mac.yml <<EOF
           version: ${VERSION}
           files:
             - url: ${MAC_FILE}
-              sha512: ""
+              sha512: ${MAC_SHA512_BASE64}
               size: ${MAC_SIZE}
           path: ${MAC_FILE}
-          sha512: ""
+          sha512: ${MAC_SHA512_BASE64}
           releaseDate: ${RELEASE_DATE}
           EOF
-            echo "✓ Created latest-mac.yml"
+            echo "✓ Created latest-mac.yml with SHA512"
             cat latest-mac.yml
+            
+            rm "$MAC_FILE"
           fi
 
       - name: Upload metadata to release

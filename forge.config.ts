@@ -18,7 +18,7 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({
       setupIcon: "./src/client/assets/icon.ico",
-      setupExe: `HSA Face Attendance Setup.exe`,
+      setupExe: `HSAFaceAttendanceSetup.exe`,
       name: "HSA Face Attendance",
     }),
     new MakerZIP({}, ["darwin"]),

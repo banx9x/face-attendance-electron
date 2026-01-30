@@ -115,7 +115,7 @@ jobs:
             curl -L -o "$WIN_FILE" "$WIN_URL"
             
             WIN_SHA512=$(sha512sum "$WIN_FILE" | awk '{print $1}')
-            WIN_SHA512_BASE64=$(echo -n "$WIN_SHA512" | xxd -r -p | base64)
+            WIN_SHA512_BASE64=$(echo -n "$WIN_SHA512" | xxd -r -p | base64 -w 0)
             
             echo "Windows SHA512: $WIN_SHA512"
             echo "Windows SHA512 (base64): $WIN_SHA512_BASE64"
@@ -143,7 +143,7 @@ jobs:
             curl -L -o "$MAC_FILE" "$MAC_URL"
             
             MAC_SHA512=$(sha512sum "$MAC_FILE" | awk '{print $1}')
-            MAC_SHA512_BASE64=$(echo -n "$MAC_SHA512" | xxd -r -p | base64)
+            MAC_SHA512_BASE64=$(echo -n "$MAC_SHA512" | xxd -r -p | base64 -w 0)
             
             echo "macOS SHA512: $MAC_SHA512"
             echo "macOS SHA512 (base64): $MAC_SHA512_BASE64"

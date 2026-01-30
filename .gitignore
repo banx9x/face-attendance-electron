@@ -99,5 +99,4 @@ __pycache__/
 *.spec.bak
 
 # DeepFace models
-models/
 faces_db/

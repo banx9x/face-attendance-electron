@@ -14,7 +14,7 @@ const dataApi = createApi({
     getSlots: builder.query<GetSlotsResponse, GetSlotsPayload>({
       query: () => `admin/exam/views/slots`,
     }),
-    getAccounts: builder.query<void, GetAccountsPayload>({
+    getAccounts: builder.query<GetAccountsResponse, GetAccountsPayload>({
       query: ({ periodId, batchId, locationId, slotId }) => ({
         url: `admin/search/accounts?periodId=${periodId}&batchId=${batchId}&locationId=${locationId}&slotId=${slotId.join("&slotId=")}&pageSize=10000&registrationStatus=PAID`,
       }),

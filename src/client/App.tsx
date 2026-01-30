@@ -30,7 +30,7 @@ const items: TabsProps["items"] = [
 const App = () => {
   return (
     <Flex vertical gap="middle">
-      <h1>Test Auto Update</h1>
+      <h1>Mother fucker bitch</h1>
 
       <Tabs defaultActiveKey="1" items={items} />
     </Flex>

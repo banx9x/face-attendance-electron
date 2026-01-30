@@ -47,7 +47,6 @@ const BatchSelector: React.FC = () => {
 
 const LocationSelector: React.FC = () => {
   const form = Form.useFormInstance();
-  const periodId = Form.useWatch("periodId");
   const batchId = Form.useWatch("batchId");
 
   const { data = [], isLoading } = dataApi.useGetBatchesQuery({});
@@ -117,7 +116,7 @@ type DataFormValues = {
 
 const DataForm: React.FC = () => {
   const [form] = Form.useForm<DataFormValues>();
-  const [getAccounts, { isLoading }] = dataApi.useLazyGetAccountsQuery();
+  const [getAccounts, { data, isLoading }] = dataApi.useLazyGetAccountsQuery();
 
   return (
     <div className="max-w-md mx-auto mt-10">
@@ -128,7 +127,9 @@ const DataForm: React.FC = () => {
         <LocationSelector />
         <SlotSelector />
 
-        <Button type="primary" htmlType="submit" block>
+        {data && <div>Tải thành công {data.data.length} tài khoản</div>}
+
+        <Button type="primary" htmlType="submit" block loading={isLoading}>
           Submit
         </Button>
       </Form>

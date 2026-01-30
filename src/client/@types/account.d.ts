@@ -4,3 +4,7 @@ type GetAccountsPayload = {
   locationId: string;
   slotId: string[];
 };
+
+type GetAccountsResponse = {
+  data: [];
+};

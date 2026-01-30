@@ -50,6 +50,10 @@ async def read_root() -> dict[str, Union[str, int]]:
 async def read_status() -> dict[str, str]:
     return {"status": "OK"}
 
+@app.get("/test")
+async def test_endpoint() -> dict[str, str]:
+    return {"message": "Test endpoint is working!"}
+
 @app.post("/face")
 async def add_face(file: UploadFile = File(...), name: str = "unknown"):
     """

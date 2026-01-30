@@ -99,10 +99,12 @@ jobs:
 
           # Extract Windows Setup.exe info
           WIN_FILE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("Setup\\.exe$")) | .name')
+          WIN_SIZE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("Setup\\.exe$")) | .size')
           WIN_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("Setup\\.exe$")) | .browser_download_url')
 
           # Extract macOS zip info
           MAC_FILE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("darwin-arm64.*\\.zip$")) | .name')
+          MAC_SIZE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("darwin-arm64.*\\.zip$")) | .size')
           MAC_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("darwin-arm64.*\\.zip$")) | .browser_download_url')
 
           RELEASE_DATE=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
@@ -124,6 +126,7 @@ jobs:
           files:
             - url: ${WIN_FILE}
               sha512: ${WIN_SHA512_BASE64}
+              size: ${WIN_SIZE}
           path: ${WIN_FILE}
           sha512: ${WIN_SHA512_BASE64}
           releaseDate: ${RELEASE_DATE}
@@ -151,6 +154,7 @@ jobs:
           files:
             - url: ${MAC_FILE}
               sha512: ${MAC_SHA512_BASE64}
+              size: ${MAC_SIZE}
           path: ${MAC_FILE}
           sha512: ${MAC_SHA512_BASE64}
           releaseDate: ${RELEASE_DATE}
